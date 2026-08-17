@@ -50,7 +50,7 @@ class WordleClient:
         seed: int | None = None,
     ) -> Sequence[JsonObject]:
         guess = word.lower()
-        effective_size = size if size is not None else self._config.word_length
+        effective_size = size if size is not None else self._config.size_begin
         if len(guess) != effective_size:
             raise ValueError(
                 f"guess length {len(guess)} does not match size {effective_size}"

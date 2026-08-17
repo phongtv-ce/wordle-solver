@@ -307,7 +307,6 @@ def _replace_config(config: AppConfig, **changes) -> AppConfig:
         api_base=config.api_base,
         api_entrypoint=config.api_entrypoint,
         api_timeout_seconds=config.api_timeout_seconds,
-        word_length=changes.get("word_length", config.word_length),
         size_begin=changes.get("size_begin", config.size_begin),
         size_end=changes.get("size_end", config.size_end),
         seed_begin=changes.get("seed_begin", config.seed_begin),

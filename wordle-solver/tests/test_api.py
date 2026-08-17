@@ -52,7 +52,7 @@ def test_client_merges_query_params_with_existing_entrypoint_query():
 
 
 def test_client_rejects_guess_when_length_does_not_match_size():
-    client = WordleClient(make_config(word_length=5), http_get=lambda *args: b"[]")
+    client = WordleClient(make_config(size_begin=5, size_end=5), http_get=lambda *args: b"[]")
     with pytest.raises(ValueError, match="guess length 4 does not match size 5"):
         client.guess("abcd")
 

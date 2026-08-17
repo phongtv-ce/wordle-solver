@@ -224,7 +224,7 @@ def test_solve_verbose_logs_attempt_lines():
     with patch("solver.display_log.sys.stdout", out):
         result = solve_daily_for_size(
             2,
-            make_config(size_begin=2, size_end=2, word_length=2),
+            make_config(size_begin=2, size_end=2),
             algorithm,
             dictionary,
             client,

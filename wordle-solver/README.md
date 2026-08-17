@@ -38,9 +38,8 @@ Settings are read from `.env` (see `.env.example`):
 | `WORDLE_API_BASE` | no | derived from entrypoint | API root for `/random` (e.g. `https://wordle.votee.dev:8000`) |
 | `WORDLE_API_TIMEOUT_SECONDS` | no | `10` | HTTP timeout |
 | `WORDLE_MODE` | no | `daily` | Puzzle source: `daily` or `random` |
-| `WORDLE_WORD_LENGTH` | no | `5` | Default length when size range is not set |
-| `WORDLE_SIZE_BEGIN` | no | `WORDLE_WORD_LENGTH` | First puzzle length to try (inclusive) |
-| `WORDLE_SIZE_END` | no | `WORDLE_WORD_LENGTH` | Last puzzle length to try (inclusive) |
+| `WORDLE_SIZE_BEGIN` | no | `5` | First puzzle length to try (inclusive) |
+| `WORDLE_SIZE_END` | no | `WORDLE_SIZE_BEGIN` | Last puzzle length to try (inclusive) |
 | `WORDLE_SEED_BEGIN` | no | — | First random seed (inclusive); requires `WORDLE_SEED_END` |
 | `WORDLE_SEED_END` | no | — | Last random seed (inclusive); used when `WORDLE_MODE=random` |
 | `WORDLE_ALGORITHM` | no | `candidates` | `candidates`, `brute_force`, or `llm` |

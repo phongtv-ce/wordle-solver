@@ -33,7 +33,6 @@ def make_config(**overrides) -> AppConfig:
         "api_base": "https://api.example.test",
         "api_entrypoint": "https://api.example.test/wordle",
         "api_timeout_seconds": 5.0,
-        "word_length": 5,
         "size_begin": 5,
         "size_end": 5,
         "seed_begin": None,
