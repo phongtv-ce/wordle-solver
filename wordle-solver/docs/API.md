@@ -1,14 +1,21 @@
 # Wordle guess API
 
-This document describes the HTTP contract between `WordleClient` and the remote puzzle API.
+This document describes the HTTP contract between `WordleClient` and the [Votee Wordle API](https://wordle.votee.dev:8000/docs).
+
+## Endpoints
+
+| Endpoint | Description |
+|----------|-------------|
+| `GET /daily?guess=&size=` | Today's puzzle for the given length |
+| `GET /random?guess=&size=&seed=` | Random word; optional `seed` for reproducibility |
+| `GET /word/{word}?guess=` | Practice against a fixed word (not used by the CLI) |
+
+The solver uses `/daily` by default and `/random` when `--random` is passed.
 
 ## Request
 
 - **Method:** `GET`
-- **URL:** `WORDLE_API_ENTRYPOINT` (no trailing slash required; config strips it)
-- **Headers:**
-  - `Accept: application/json`
-  - `Authorization: Bearer {WORDLE_API_KEY}` — only when `WORDLE_API_KEY` is set
+- **Headers:** `Accept: application/json`
 
 **Query parameters:**
 
@@ -16,14 +23,27 @@ This document describes the HTTP contract between `WordleClient` and the remote 
 |-----------|------|----------|-------------|
 | `guess` | string | yes | Lowercase guess word |
 | `size` | int | yes | Word length; must equal `len(guess)` |
+| `seed` | int | no | `/random` only — same seed + size → same target word |
 
-Example:
+### Daily
 
 ```http
 GET https://wordle.votee.dev:8000/daily?guess=guess&size=5
+Accept: application/json
 ```
 
-The client lowercases the guess before sending and sets `size` from `WORDLE_WORD_LENGTH`. If `len(guess) != size`, the client raises before calling the API.
+Configured via `WORDLE_API_ENTRYPOINT` (typically ends with `/daily`).
+
+### Random
+
+```http
+GET https://wordle.votee.dev:8000/random?guess=crane&size=5&seed=42
+Accept: application/json
+```
+
+Built from `WORDLE_API_BASE` (derived from entrypoint or set explicitly). Enable with `wordle-solver --random`; pass `--seed 42` for a reproducible puzzle.
+
+The client lowercases the guess before sending. If `len(guess) != size`, the client raises before calling the API.
 
 ## Response
 

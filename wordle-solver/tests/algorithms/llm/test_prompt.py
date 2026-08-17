@@ -1,8 +1,9 @@
 import pytest
 
+from solver.algorithms.llm import next_guess as llm_next_guess
 from solver.algorithms.llm.prompt import build_prompt, extract_guess, format_history
 from solver.types import SlotFeedback
-from tests.helpers import GUESS_FEEDBACK
+from tests.helpers import GUESS_FEEDBACK, make_state
 
 
 def test_build_prompt_includes_word_length_and_history():
@@ -37,3 +38,19 @@ def test_format_history_slot_shape_matches_api():
     text = format_history((("gu", feedback),))
     assert '"guess": "g"' in text
     assert '"result": "absent"' in text
+
+
+def test_llm_next_guess_uses_complete_callback():
+    state = make_state(word_length=5)
+    guess = llm_next_guess(
+        state,
+        history=(),
+        complete=lambda prompt: "<guess>CRANE</guess>",
+    )
+    assert guess == "crane"
+
+
+def test_llm_next_guess_requires_complete_callback():
+    state = make_state(word_length=5)
+    with pytest.raises(NotImplementedError, match="complete"):
+        llm_next_guess(state)

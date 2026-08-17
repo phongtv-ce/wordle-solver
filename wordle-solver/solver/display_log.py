@@ -109,3 +109,54 @@ def log_guess_attempt_header(*, stream: object = None, color: bool | None = None
         headers = tuple(_colorize(h, _DIM, True) for h in headers)
     out = stream if stream is not None else sys.stdout
     print(" | ".join(headers), file=out, flush=True)
+
+
+SOLVE_SUMMARY_TITLE = "wordle-solver"
+
+
+def format_solve_summary_line(
+    attempts: int,
+    word: str,
+    size: int,
+    *,
+    seed: int | None = None,
+) -> str:
+    """One solved-puzzle line: attempts | answer (size N) or (size N, seed S)."""
+    suffix = f"size {size}"
+    if seed is not None:
+        suffix += f", seed {seed}"
+    return f"{attempts} | {word} ({suffix})"
+
+
+def log_solve_summary_header(
+    *,
+    show_seed: bool = False,
+    stream: object = None,
+    color: bool | None = None,
+) -> None:
+    """Print title and column headers for non-verbose solve summaries."""
+    use_color = color if color is not None else _use_color()
+    out = stream if stream is not None else sys.stdout
+    title = SOLVE_SUMMARY_TITLE
+    if use_color:
+        title = _colorize(title, _DIM, True)
+    print(title, file=out, flush=True)
+    size_label = "size[, seed]" if show_seed else "size"
+    headers = ("attempts", f"answer ({size_label})")
+    if use_color:
+        headers = tuple(_colorize(h, _DIM, True) for h in headers)
+    print(" | ".join(headers), file=out, flush=True)
+
+
+def log_solve_summary_line(
+    attempts: int,
+    word: str,
+    size: int,
+    *,
+    seed: int | None = None,
+    stream: object = None,
+) -> None:
+    """Print one non-verbose solved-puzzle line."""
+    line = format_solve_summary_line(attempts, word, size, seed=seed)
+    out = stream if stream is not None else sys.stdout
+    print(line, file=out, flush=True)

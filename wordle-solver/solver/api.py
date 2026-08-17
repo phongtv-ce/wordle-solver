@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 from collections.abc import Callable, Mapping, Sequence
+from typing import Literal
 from urllib.error import HTTPError, URLError
 from urllib.parse import parse_qsl, urlencode, urlparse, urlunparse
 from urllib.request import Request, urlopen
@@ -10,10 +11,29 @@ from solver.config import AppConfig
 
 JsonObject = Mapping[str, object]
 HttpGet = Callable[[str, dict[str, str], float], bytes]
+PuzzleMode = Literal["daily", "random"]
 
 
 class WordleApiError(RuntimeError):
     pass
+
+
+def derive_api_base(entrypoint: str) -> str:
+    """Strip a known puzzle path suffix to get the API base URL."""
+    url = entrypoint.rstrip("/")
+    for suffix in ("/daily", "/random"):
+        if url.endswith(suffix):
+            return url[: -len(suffix)]
+    return url
+
+
+def endpoint_for_puzzle(entrypoint: str, api_base: str, puzzle: PuzzleMode) -> str:
+    daily_url = entrypoint.rstrip("/")
+    if puzzle == "daily":
+        if daily_url.endswith("/daily"):
+            return daily_url
+        return daily_url
+    return f"{api_base.rstrip('/')}/random"
 
 
 class WordleClient:
@@ -21,21 +41,32 @@ class WordleClient:
         self._config = config
         self._http_get = http_get or _urllib_get
 
-    def guess(self, word: str) -> Sequence[JsonObject]:
+    def guess(
+        self,
+        word: str,
+        *,
+        size: int | None = None,
+        puzzle: PuzzleMode = "daily",
+        seed: int | None = None,
+    ) -> Sequence[JsonObject]:
         guess = word.lower()
-        size = self._config.word_length
-        if len(guess) != size:
+        effective_size = size if size is not None else self._config.word_length
+        if len(guess) != effective_size:
             raise ValueError(
-                f"guess length {len(guess)} does not match size {size}"
+                f"guess length {len(guess)} does not match size {effective_size}"
             )
 
-        url = _url_with_query(
+        endpoint = endpoint_for_puzzle(
             self._config.api_entrypoint,
-            {"guess": guess, "size": size},
+            self._config.api_base,
+            puzzle,
         )
+        params: dict[str, object] = {"guess": guess, "size": effective_size}
+        if puzzle == "random" and seed is not None:
+            params["seed"] = seed
+
+        url = _url_with_query(endpoint, params)
         headers = {"Accept": "application/json"}
-        if self._config.api_key:
-            headers["Authorization"] = f"Bearer {self._config.api_key}"
 
         try:
             body = self._http_get(

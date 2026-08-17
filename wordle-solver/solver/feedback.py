@@ -24,7 +24,7 @@ def parse_feedback(raw: Sequence[Mapping[str, object]]) -> Feedback:
 
 
 def is_solved(feedback: Feedback) -> bool:
-    return all(slot.result == "correct" for slot in feedback)
+    return bool(feedback) and all(slot.result == "correct" for slot in feedback)
 
 
 def update_correct_state(

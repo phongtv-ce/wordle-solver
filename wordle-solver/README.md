@@ -34,10 +34,15 @@ Settings are read from `.env` (see `.env.example`):
 
 | Variable | Required | Default | Description |
 |----------|----------|---------|-------------|
-| `WORDLE_API_ENTRYPOINT` | yes | — | POST URL for guesses |
-| `WORDLE_API_KEY` | no | — | Bearer token, if the API requires auth |
+| `WORDLE_API_ENTRYPOINT` | yes | — | Daily puzzle URL (e.g. `https://wordle.votee.dev:8000/daily`) |
+| `WORDLE_API_BASE` | no | derived from entrypoint | API root for `/random` (e.g. `https://wordle.votee.dev:8000`) |
 | `WORDLE_API_TIMEOUT_SECONDS` | no | `10` | HTTP timeout |
-| `WORDLE_WORD_LENGTH` | no | `5` | Puzzle word length |
+| `WORDLE_MODE` | no | `daily` | Puzzle source: `daily` or `random` |
+| `WORDLE_WORD_LENGTH` | no | `5` | Default length when size range is not set |
+| `WORDLE_SIZE_BEGIN` | no | `WORDLE_WORD_LENGTH` | First puzzle length to try (inclusive) |
+| `WORDLE_SIZE_END` | no | `WORDLE_WORD_LENGTH` | Last puzzle length to try (inclusive) |
+| `WORDLE_SEED_BEGIN` | no | — | First random seed (inclusive); requires `WORDLE_SEED_END` |
+| `WORDLE_SEED_END` | no | — | Last random seed (inclusive); used when `WORDLE_MODE=random` |
 | `WORDLE_ALGORITHM` | no | `candidates` | `candidates`, `brute_force`, or `llm` |
 | `WORDLE_DICTIONARY_PATH` | no | `../data/words_alpha.txt` | Path to word list |
 | `WORDLE_MAX_GUESSES` | no | `50` | Stop after this many guesses |
@@ -46,23 +51,41 @@ Settings are read from `.env` (see `.env.example`):
 
 ```bash
 wordle-solver
-wordle-solver --algorithm brute_force
-wordle-solver --algorithm candidates --env-file /path/to/.env
+wordle-solver --mode random
+wordle-solver --random --seed 42
+wordle-solver --size-begin 4 --size-end 8 -v
 ```
 
-On success the program prints the solved word and exits `0`. If `WORDLE_MAX_GUESSES` is reached without a full `correct` row, it exits `1`.
+**Daily** (`WORDLE_MODE=daily`): loops sizes in `[WORDLE_SIZE_BEGIN, WORDLE_SIZE_END]` against `GET /daily`. If the first guess for size `N` returns a server/parse error, that size is skipped.
+
+**Random** (`WORDLE_MODE=random` or `--random`): loops sizes (and optional seed range) against `GET /random`. Same seed + size → same word on [wordle.votee.dev](https://wordle.votee.dev:8000/docs).
+
+On success the program prints each solved word. If `WORDLE_MAX_GUESSES` is reached for any size, it exits `1`.
 
 ## API contract
 
-The client sends:
+[Votee Wordle API](https://wordle.votee.dev:8000/docs) endpoints:
+
+| Endpoint | Description |
+|----------|-------------|
+| `GET /daily?guess=&size=` | Today's puzzle for the given length |
+| `GET /random?guess=&size=&seed=` | Random word; optional `seed` for reproducibility |
+| `GET /word/{word}?guess=` | Practice against a fixed word |
+
+Daily (default):
 
 ```http
 GET {WORDLE_API_ENTRYPOINT}?guess=guess&size=5
 Accept: application/json
-Authorization: Bearer {WORDLE_API_KEY}   # optional
 ```
 
-`size` is `WORDLE_WORD_LENGTH` and must match the length of `guess`.
+Random:
+
+```http
+GET {WORDLE_API_BASE}/random?guess=guess&size=5&seed=42
+```
+
+`size` must match the length of `guess`. The client lowercases guesses before sending.
 
 The response must be a JSON **array** of slot results:
 

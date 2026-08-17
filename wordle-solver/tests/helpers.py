@@ -1,3 +1,4 @@
+from solver.config import AppConfig
 from solver.types import SlotFeedback, SolverState
 
 ALPHABET = frozenset("abcdefghijklmnopqrstuvwxyz")
@@ -27,6 +28,25 @@ SOLVED_FEEDBACK = (
 )
 
 
+def make_config(**overrides) -> AppConfig:
+    values = {
+        "api_base": "https://api.example.test",
+        "api_entrypoint": "https://api.example.test/wordle",
+        "api_timeout_seconds": 5.0,
+        "word_length": 5,
+        "size_begin": 5,
+        "size_end": 5,
+        "seed_begin": None,
+        "seed_end": None,
+        "mode": "daily",
+        "algorithm": "candidates",
+        "dictionary_path": "/tmp/words.txt",
+        "max_guesses": 50,
+    }
+    values.update(overrides)
+    return AppConfig(**values)
+
+
 def make_state(*, word_length: int = 5, **overrides) -> SolverState:
     values = {
         "word_length": word_length,
@@ -44,3 +64,42 @@ def make_state(*, word_length: int = 5, **overrides) -> SolverState:
     }
     values.update(overrides)
     return SolverState(**values)
+
+
+def wordle_feedback(guess: str, target: str) -> tuple[SlotFeedback, ...]:
+    """Compute standard Wordle feedback for a guess against a target word."""
+    guess = guess.lower()
+    target = target.lower()
+    if len(guess) != len(target):
+        raise ValueError("guess and target must have the same length")
+
+    n = len(target)
+    results: list[str] = ["absent"] * n
+    remaining: dict[str, int] = {}
+    for letter in target:
+        remaining[letter] = remaining.get(letter, 0) + 1
+
+    for i in range(n):
+        if guess[i] == target[i]:
+            results[i] = "correct"
+            remaining[guess[i]] -= 1
+
+    for i in range(n):
+        if results[i] == "correct":
+            continue
+        letter = guess[i]
+        if remaining.get(letter, 0) > 0:
+            results[i] = "present"
+            remaining[letter] -= 1
+
+    return tuple(
+        SlotFeedback(slot=i, guess=guess[i], result=results[i])
+        for i in range(n)
+    )
+
+
+def wordle_feedback_raw(guess: str, target: str) -> list[dict[str, object]]:
+    return [
+        {"slot": slot.slot, "guess": slot.guess, "result": slot.result}
+        for slot in wordle_feedback(guess, target)
+    ]

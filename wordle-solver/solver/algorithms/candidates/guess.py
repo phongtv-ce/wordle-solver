@@ -109,10 +109,10 @@ def select_candidate_guess(
     present_state: tuple[frozenset[str], ...],
     present_chars: frozenset[str],
 ) -> str:
-    return max(
+    return min(
         candidates,
         key=lambda word: (
-            score_candidate(word, correct_state, present_state, present_chars),
+            -score_candidate(word, correct_state, present_state, present_chars),
             word,
         ),
     )

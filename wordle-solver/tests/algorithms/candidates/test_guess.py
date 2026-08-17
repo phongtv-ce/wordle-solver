@@ -1,7 +1,6 @@
 from solver.algorithms.brute_force.probes import next_fallback_guess
 from solver.algorithms.candidates.guess import (
     build_probe_guess,
-    can_place,
     chars_not_universal,
     next_guess,
     place_letters,
@@ -9,6 +8,7 @@ from solver.algorithms.candidates.guess import (
     score_candidate,
     select_candidate_guess,
 )
+from solver.algorithms.candidates.placement import can_place
 from tests.helpers import ALPHABET, make_state
 
 EMPTY5 = (frozenset(), frozenset(), frozenset(), frozenset(), frozenset())
@@ -102,16 +102,15 @@ def test_build_probe_guess_falls_back_to_discriminating_present_chars():
         correct_state=(None, None),
         untried_external_chars=frozenset(),
     )
-    guess = build_probe_guess(state)
-    assert len(guess) == 2
-    assert set(guess) <= set("abc")
-    assert "b" in guess or "c" in guess
+    assert build_probe_guess(state) == "bc"
 
 
-def test_score_candidate_prefers_more_correct_slots():
+def test_score_candidate_exact_values():
     present_state = (frozenset(), frozenset(), frozenset())
     higher = score_candidate("abc", ("a", None, None), present_state, frozenset({"a"}))
     lower = score_candidate("xbc", ("a", None, None), present_state, frozenset({"a"}))
+    assert higher == 6
+    assert lower == 3
     assert higher > lower
 
 
@@ -142,7 +141,7 @@ def test_next_guess_uses_the_single_remaining_candidate():
     assert next_guess(state) == "ba"
 
 
-def test_next_guess_chooses_one_of_two_remaining_candidates():
+def test_next_guess_chooses_lexicographic_candidate_when_two_remain():
     state = make_state(
         word_length=2,
         candidates=("ab", "ac"),
@@ -150,7 +149,7 @@ def test_next_guess_chooses_one_of_two_remaining_candidates():
         present_state=(frozenset(), frozenset()),
         correct_state=(None, None),
     )
-    assert next_guess(state) in {"ab", "ac"}
+    assert next_guess(state) == "ab"
 
 
 def test_next_guess_probes_when_more_than_two_candidates_remain():

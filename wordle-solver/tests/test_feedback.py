@@ -39,6 +39,20 @@ def test_parse_feedback_rejects_missing_fields():
         parse_feedback([{"slot": 0, "guess": "a"}])
 
 
+def test_parse_feedback_rejects_non_int_slot():
+    with pytest.raises(ValueError, match="invalid slot"):
+        parse_feedback([{"slot": "0", "guess": "a", "result": "absent"}])
+
+
+def test_parse_feedback_rejects_multi_char_guess():
+    with pytest.raises(ValueError, match="invalid guess letter"):
+        parse_feedback([{"slot": 0, "guess": "ab", "result": "absent"}])
+
+
+def test_is_solved_false_for_empty_feedback():
+    assert is_solved(()) is False
+
+
 def test_is_solved_true_when_every_slot_is_correct():
     assert is_solved(SOLVED_FEEDBACK) is True
 
