@@ -1,6 +1,6 @@
 # Wordle guess API
 
-This document describes the HTTP contract between `WordleClient` and the [Votee Wordle API](https://wordle.votee.dev:8000/docs).
+This document describes the HTTP contract between `WordleClient` and the remote guess API.
 
 ## Endpoints
 
@@ -28,7 +28,7 @@ The solver uses `/daily` by default and `/random` when `--random` is passed.
 ### Daily
 
 ```http
-GET https://wordle.votee.dev:8000/daily?guess=guess&size=5
+GET http://localhost:8000/daily?guess=guess&size=5
 Accept: application/json
 ```
 
@@ -37,7 +37,7 @@ Configured via `WORDLE_API_BASE` with `/daily` appended when `WORDLE_MODE=daily`
 ### Random
 
 ```http
-GET https://wordle.votee.dev:8000/random?guess=crane&size=5&seed=42
+GET http://localhost:8000/random?guess=crane&size=5&seed=42
 Accept: application/json
 ```
 

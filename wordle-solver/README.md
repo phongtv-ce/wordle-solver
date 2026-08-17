@@ -56,13 +56,13 @@ wordle-solver --size-begin 4 --size-end 8 -v
 
 **Daily** (`WORDLE_MODE=daily`): loops sizes in `[WORDLE_SIZE_BEGIN, WORDLE_SIZE_END]` against `GET /daily`. If the first guess for size `N` returns a server/parse error, that size is skipped.
 
-**Random** (`WORDLE_MODE=random` or `--random`): loops sizes (and optional seed range) against `GET /random`. Same seed + size → same word on [wordle.votee.dev](https://wordle.votee.dev:8000/docs).
+**Random** (`WORDLE_MODE=random` or `--random`): loops sizes (and optional seed range) against `GET /random`. Same seed + size returns the same target word.
 
 On success the program prints each solved word. If `WORDLE_MAX_GUESSES` is reached for any size, it exits `1`.
 
 ## API contract
 
-[Votee Wordle API](https://wordle.votee.dev:8000/docs) endpoints:
+Remote guess API endpoints:
 
 | Endpoint | Description |
 |----------|-------------|
@@ -118,7 +118,7 @@ wordle-solver/
 │   ├── types.py             # SolverState, Feedback, helpers
 │   └── algorithms/
 │       ├── candidates/      # Dictionary narrowing + probe guesses
-│       ├── brute_force/     # Charset / position probes
+│       ├── brute_force/     # Charset / position probes / assemble
 │       └── llm/             # Prompt builder + guess extraction
 ├── tests/                   # pytest suite (TDD)
 └── docs/                    # Architecture and function reference

@@ -127,14 +127,13 @@ Detailed design: [../../docs/algorithms/candidtes.md](../../docs/algorithms/cand
 
 ## Brute-force algorithm
 
-`WORDLE_ALGORITHM=brute_force` ignores the dictionary for guessing:
+`WORDLE_ALGORITHM=brute_force` ignores the dictionary for guessing.
 
-1. **Charset probe** — test `N` unused letters at once to discover which letters appear in the word.
-2. **Position probe** — fill unknown slots with one known letter, keeping already-correct slots (`iieiiiii` after `e` is locked, not `iiiiiiii`). When some slots are already green, skip this and fill remaining holes with extra copies of correct letters, then other present letters.
+See **[algorithms/brute-force.md](algorithms/brute-force.md)** for the core charset → position-probe flow.
 
-`apply_feedback` reuses the candidates pipeline so `present_chars`, `correct_state`, and untried sets stay consistent. `next_guess` always calls `next_fallback_guess`.
+`next_fallback_guess` (also used when candidates hit `0`): charset while untried letters remain (`untried_external`, then `untried_dictionary`), then position-probe each present letter at most once (unknown slots only; correct slots kept), then fill any remaining holes from `present_chars` via `can_place`.
 
-Details: [../../docs/algorithms/brute-force.md](../../docs/algorithms/brute-force.md).
+`apply_feedback` reuses the candidates pipeline (shared `SolverState` and untried sets). `next_guess` always calls `next_fallback_guess`.
 
 ## LLM algorithm
 

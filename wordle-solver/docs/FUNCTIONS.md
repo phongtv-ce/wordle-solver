@@ -250,38 +250,40 @@ Immutable game state. Fields documented in [ARCHITECTURE.md](ARCHITECTURE.md#sol
 
 ## Brute-force probes (`solver/algorithms/brute_force/probes.py`)
 
+See [algorithms/brute-force.md](algorithms/brute-force.md).
+
 ### `charset_probe(untried, n)`
 
-- **Purpose:** Test `n` unused letters to discover the charset (step 1).
+- **Purpose:** Find the character set (step 1).
 - **Input:** unused letters, word length
-- **Output:** `str` length `n` — first `n` distinct letters from `untried`
+- **Output:** `str` length `n` (cycles if fewer than `n` letters remain)
 
 ### `position_probe(letter, n, correct_state=())`
 
-- **Purpose:** Find a letter’s slot by filling unknown positions with it (step 2), while keeping letters already locked in `correct_state`.
+- **Purpose:** Repeat `letter` in unknown slots to find its position (step 2); keeps `correct_state` greens. Example: `aaaaa`, or `iieiiiii` when slot 2 is already `e`.
 - **Input:** one letter, `n`, optional `correct_state`
-- **Output:** `str` — `correct_state[i]` when set, otherwise `letter` (e.g. `"iieiiiii"` after `e` at slot 2)
+- **Output:** `str` length `n`
 
 ### `position_probe_letter(feedback, correct_state=())`
 
 - **Purpose:** Detect which letter a position-probe guess was testing.
 - **Input:** `Feedback`, pre-guess `correct_state`
-- **Output:** the repeated unknown-slot letter, or `None` if the guess is not a position probe
+- **Output:** the repeated letter, or `None`
 
 ### `unplaced_present(present_chars, correct_state, min_counts)`
 
 - **Purpose:** Present letters not yet fully placed in `correct_state`.
 - **Input:** present set, `correct_state`, `min_counts`
-- **Output:** `tuple[str, ...]` — letters where `correct_state.count(c) < min_counts.get(c, 1)`
+- **Output:** `tuple[str, ...]`
 
 ### `next_fallback_guess(state)`
 
 - **Purpose:** Next guess when dictionary candidates are empty.
 - **Input:** `SolverState`
 - **Output:** `str` —
-  1. `charset_probe` if untried letters remain
-  2. else `position_probe` if no slots are correct yet and unplaced present letters exist
-  3. else fill remaining holes from correct letters (extra copies) then `present_chars` that `can_place`
+  1. `charset_probe` while `untried_external_chars` or `untried_dictionary_chars` remain
+  2. else `position_probe` once per present letter not in `position_probed_chars` (unknown slots only)
+  3. else fill holes from `present_chars` that `can_place`
 
 ---
 

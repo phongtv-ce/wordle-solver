@@ -55,6 +55,9 @@ def initial_state(n: int, dictionary: Sequence[str]) -> SolverState:
 
 
 def apply_feedback(state: SolverState, feedback: Feedback) -> SolverState:
+    from solver.algorithms.brute_force.probes import position_probe_letter
+
+    probe_letter = position_probe_letter(feedback, state.correct_state)
     correct_state = update_correct_state(state.correct_state, feedback)
     present_state = update_present_state(state.present_state, feedback)
     newly_present, newly_absent, delta_min, delta_max = letter_outcomes(feedback)
@@ -96,6 +99,10 @@ def apply_feedback(state: SolverState, feedback: Feedback) -> SolverState:
         min_counts=min_counts,
         max_counts=max_counts,
         tried_chars=tried_chars,
-        position_probed_chars=state.position_probed_chars,
+        position_probed_chars=(
+            state.position_probed_chars | {probe_letter}
+            if probe_letter is not None
+            else state.position_probed_chars
+        ),
         candidates=candidates,
     )

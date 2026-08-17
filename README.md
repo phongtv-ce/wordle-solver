@@ -1,6 +1,6 @@
 # Wordle Solver
 
-A Python solver for [Wordle-style puzzles](https://wordle.votee.dev:8000/docs). It posts guesses to a remote API and narrows the answer using feedback (`correct`, `present`, `absent`).
+A Python solver for Wordle-style puzzles. It posts guesses to a remote API and narrows the answer using feedback (`correct`, `present`, `absent`).
 
 **Getting started:** see [wordle-solver/README.md](wordle-solver/README.md) for setup, configuration, and usage.
 

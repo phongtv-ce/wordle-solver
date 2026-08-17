@@ -31,8 +31,8 @@ def test_candidates_algorithm_solves_known_target():
     raise AssertionError("candidates algorithm did not solve within 15 guesses")
 
 
-def test_fallback_fills_present_slots_with_correct_and_present_letters():
-    """Near-miss dictionary word: only test remaining holes, using extra greens."""
+def test_fallback_does_not_repeat_position_probe():
+    """Dictionary miss: repeat each letter in unknown slots, keep greens."""
     target = "counterintuitive"
     dictionary = ("counterinvective",)
     state = initial_state(16, dictionary)
