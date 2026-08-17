@@ -49,6 +49,7 @@ def initial_state(n: int, dictionary: Sequence[str]) -> SolverState:
         min_counts={},
         max_counts={},
         tried_chars=frozenset(),
+        position_probed_chars=frozenset(),
         candidates=candidates,
     )
 
@@ -95,5 +96,6 @@ def apply_feedback(state: SolverState, feedback: Feedback) -> SolverState:
         min_counts=min_counts,
         max_counts=max_counts,
         tried_chars=tried_chars,
+        position_probed_chars=state.position_probed_chars,
         candidates=candidates,
     )

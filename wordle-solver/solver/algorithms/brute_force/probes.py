@@ -1,7 +1,39 @@
 from collections.abc import Mapping, Sequence
 
 from solver.algorithms.candidates.placement import can_place
-from solver.types import SolverState
+from solver.types import Feedback, SolverState
+
+
+def is_position_probe_feedback(
+    feedback: Feedback,
+    correct_state: Sequence[str | None] = (),
+) -> bool:
+    return position_probe_letter(feedback, correct_state) is not None
+
+
+def position_probe_letter(
+    feedback: Feedback,
+    correct_state: Sequence[str | None] = (),
+) -> str | None:
+    """Return the repeated letter if this guess is a position probe, else None.
+
+    A position probe fills every still-unknown slot with the same letter and
+    keeps letters already locked in ``correct_state``.
+    """
+    if not feedback:
+        return None
+    unknown: list[str] = []
+    for slot in feedback:
+        known = correct_state[slot.slot] if slot.slot < len(correct_state) else None
+        if known is not None:
+            continue
+        unknown.append(slot.guess)
+    if not unknown:
+        return None
+    letter = unknown[0]
+    if all(guessed == letter for guessed in unknown):
+        return letter
+    return None
 
 
 def charset_probe(untried: Sequence[str], n: int) -> str:
@@ -16,8 +48,15 @@ def charset_probe(untried: Sequence[str], n: int) -> str:
     return "".join(result)
 
 
-def position_probe(letter: str, n: int) -> str:
-    return letter * n
+def position_probe(
+    letter: str,
+    n: int,
+    correct_state: Sequence[str | None] = (),
+) -> str:
+    return "".join(
+        correct_state[i] if i < len(correct_state) and correct_state[i] is not None else letter
+        for i in range(n)
+    )
 
 
 def unplaced_present(
@@ -34,17 +73,20 @@ def unplaced_present(
 
 
 def next_fallback_guess(state: SolverState) -> str:
-    unplaced = unplaced_present(
-        state.present_chars, state.correct_state, state.min_counts
-    )
-    if unplaced and any(slot is None for slot in state.correct_state):
-        return position_probe(unplaced[0], state.word_length)
-
+    # Step 1: discover letters with untried external (non-dictionary) chars first.
     untried = sorted(state.untried_external_chars)
     if not untried:
         untried = sorted(state.untried_dictionary_chars)
-    if untried and any(slot is None for slot in state.correct_state):
+    if untried:
         return charset_probe(untried, state.word_length)
+
+    # Step 2: position-probe each discovered letter at most once.
+    unplaced = unplaced_present(
+        state.present_chars, state.correct_state, state.min_counts
+    )
+    for letter in unplaced:
+        if letter not in state.position_probed_chars:
+            return position_probe(letter, state.word_length, state.correct_state)
 
     slots: list[str | None] = list(state.correct_state)
     for letter in sorted(state.present_chars):

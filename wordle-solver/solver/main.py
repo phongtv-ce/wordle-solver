@@ -19,6 +19,12 @@ def main(argv: list[str] | None = None) -> int:
         help="Override WORDLE_ALGORITHM from .env",
     )
     parser.add_argument("--env-file", help="Path to a .env file")
+    parser.add_argument(
+        "-v",
+        "--verbose",
+        action="store_true",
+        help="Show colored feedback logs after each guess",
+    )
     args = parser.parse_args(argv)
 
     config = load_config(env_file=args.env_file)
@@ -28,7 +34,9 @@ def main(argv: list[str] | None = None) -> int:
     dictionary = load_dictionary(config.dictionary_path)
     state = algorithm.initial_state(config.word_length, dictionary)
 
-    log_guess_attempt_header()
+    if args.verbose:
+        log_guess_attempt_header()
+
     attempt = 0
     for _ in range(config.max_guesses):
         attempt += 1
@@ -36,9 +44,12 @@ def main(argv: list[str] | None = None) -> int:
         raw = client.guess(guess)
         feedback = parse_feedback(raw)
         state = algorithm.apply_feedback(state, feedback)
-        log_guess_attempt(attempt, feedback, state)
+        if args.verbose:
+            log_guess_attempt(attempt, feedback, state)
         if is_solved(feedback):
-            print(guess)
+            if args.verbose:
+                return 0
+            print(f"{attempt} | {guess}")
             return 0
 
     print("max guesses reached without solving", file=sys.stderr)

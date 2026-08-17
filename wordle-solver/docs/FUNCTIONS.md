@@ -256,11 +256,17 @@ Immutable game state. Fields documented in [ARCHITECTURE.md](ARCHITECTURE.md#sol
 - **Input:** unused letters, word length
 - **Output:** `str` length `n` — first `n` distinct letters from `untried`
 
-### `position_probe(letter, n)`
+### `position_probe(letter, n, correct_state=())`
 
-- **Purpose:** Find a letter’s slot by repeating it (step 2).
-- **Input:** one letter, `n`
-- **Output:** `str` — letter repeated `n` times
+- **Purpose:** Find a letter’s slot by filling unknown positions with it (step 2), while keeping letters already locked in `correct_state`.
+- **Input:** one letter, `n`, optional `correct_state`
+- **Output:** `str` — `correct_state[i]` when set, otherwise `letter` (e.g. `"iieiiiii"` after `e` at slot 2)
+
+### `position_probe_letter(feedback, correct_state=())`
+
+- **Purpose:** Detect which letter a position-probe guess was testing.
+- **Input:** `Feedback`, pre-guess `correct_state`
+- **Output:** the repeated unknown-slot letter, or `None` if the guess is not a position probe
 
 ### `unplaced_present(present_chars, correct_state, min_counts)`
 

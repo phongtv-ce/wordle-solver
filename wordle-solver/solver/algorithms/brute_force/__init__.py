@@ -1,6 +1,7 @@
 from collections.abc import Sequence
+from dataclasses import replace
 
-from solver.algorithms.brute_force.probes import next_fallback_guess
+from solver.algorithms.brute_force.probes import next_fallback_guess, position_probe_letter
 from solver.types import Feedback, SolverState, alphabet, empty_correct_state, empty_present_state
 
 NAME = "brute_force"
@@ -20,6 +21,7 @@ def initial_state(n: int, dictionary: Sequence[str] = ()) -> SolverState:
         min_counts={},
         max_counts={},
         tried_chars=frozenset(),
+        position_probed_chars=frozenset(),
         candidates=(),
     )
 
@@ -27,7 +29,14 @@ def initial_state(n: int, dictionary: Sequence[str] = ()) -> SolverState:
 def apply_feedback(state: SolverState, feedback: Feedback) -> SolverState:
     from solver.algorithms.candidates.state import apply_feedback as apply_candidate_feedback
 
-    return apply_candidate_feedback(state, feedback)
+    new_state = apply_candidate_feedback(state, feedback)
+    letter = position_probe_letter(feedback, state.correct_state)
+    if letter is not None:
+        return replace(
+            new_state,
+            position_probed_chars=new_state.position_probed_chars | {letter},
+        )
+    return new_state
 
 
 def next_guess(state: SolverState) -> str:

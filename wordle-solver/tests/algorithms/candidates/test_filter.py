@@ -50,7 +50,10 @@ def test_word_matches_and_of_all_constraints():
     }
     assert word_matches("judas", **kwargs) is True
     assert word_matches("guess", **kwargs) is False
-    assert word_matches("ludus", **kwargs) is False
+    # Same slot rules as judas (u at 1, s at 4, s not at 3). Duplicate counts are ignored.
+    assert word_matches("ludus", **kwargs) is True
+    # Fails the corresponding-index check: s is forbidden at slot 3.
+    assert word_matches("jussx", **kwargs) is False
 
 
 def test_filter_candidates_keeps_only_matching_words_in_order():

@@ -26,6 +26,7 @@ class SolverState:
     min_counts: Mapping[str, int]
     max_counts: Mapping[str, int]
     tried_chars: frozenset[str]
+    position_probed_chars: frozenset[str]
     candidates: tuple[str, ...]
 
 

@@ -12,8 +12,15 @@
 
 ### 2. Determine the exact position of each character
 
-- Method: For each newly found character, try repeating that character across all positions (e.g., aaaaa, then bbbbb, etc.) and use the feedback to determine its exact position in the word.
+- Method: For each newly found character, fill every **unknown** slot with that character and **keep letters already marked correct**. Use the feedback to lock the new letter’s index.
 
-- Number of attempts: Each character takes a maximum of 1 attempt. With N characters, the total number of attempts in this step is N times.
+  Example (target `pleurisy`, after `e` is locked at slot 2):
 
-> Worst-case: 27 attempts (find the characters set (1) + repeating all character(26))
+  - Probe `i` as `iieiiiii`, not `iiiiiiii`.
+  - Slot 2 stays `e` (`correct`); remaining slots test `i`.
+
+  Keeping known-correct letters means later probes can finish the word in fewer guesses, because `is_solved` checks the current guess row — overwriting a known slot would force extra reconstruction attempts.
+
+- Number of attempts: Each remaining unplaced character takes a maximum of 1 attempt. With N characters, the total number of attempts in this step is at most N.
+
+> Worst-case: 27 attempts (find the characters set (1) + repeating all character(26)). Average is lower when correct slots are reused.

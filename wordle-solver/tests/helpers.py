@@ -39,6 +39,7 @@ def make_state(*, word_length: int = 5, **overrides) -> SolverState:
         "min_counts": {},
         "max_counts": {},
         "tried_chars": frozenset(),
+        "position_probed_chars": frozenset(),
         "candidates": (),
     }
     values.update(overrides)

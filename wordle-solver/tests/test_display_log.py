@@ -32,6 +32,7 @@ def test_format_guess_attempt_line_without_color():
         min_counts={"a": 1},
         max_counts={"b": 0},
         tried_chars=frozenset({"a", "b"}),
+        position_probed_chars=frozenset(),
         candidates=("ac",),
     )
     line = format_guess_attempt_line(1, feedback, state, color=False)
