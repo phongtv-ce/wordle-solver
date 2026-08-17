@@ -20,20 +20,23 @@ class WordleApiError(RuntimeError):
 
 def derive_api_base(entrypoint: str) -> str:
     """Strip a known puzzle path suffix to get the API base URL."""
-    url = entrypoint.rstrip("/")
+    return normalize_api_base(entrypoint)
+
+
+def normalize_api_base(url: str) -> str:
+    """Return the API root without a trailing /daily or /random path."""
+    parsed = urlparse(url.rstrip("/"))
+    path = parsed.path.rstrip("/")
     for suffix in ("/daily", "/random"):
-        if url.endswith(suffix):
-            return url[: -len(suffix)]
-    return url
+        if path.endswith(suffix):
+            path = path[: -len(suffix)]
+    return urlunparse(parsed._replace(path=path))
 
 
-def endpoint_for_puzzle(entrypoint: str, api_base: str, puzzle: PuzzleMode) -> str:
-    daily_url = entrypoint.rstrip("/")
-    if puzzle == "daily":
-        if daily_url.endswith("/daily"):
-            return daily_url
-        return daily_url
-    return f"{api_base.rstrip('/')}/random"
+def endpoint_for_puzzle(api_base: str, puzzle: PuzzleMode) -> str:
+    parsed = urlparse(normalize_api_base(api_base))
+    path = parsed.path.rstrip("/")
+    return urlunparse(parsed._replace(path=f"{path}/{puzzle}"))
 
 
 class WordleClient:
@@ -56,11 +59,7 @@ class WordleClient:
                 f"guess length {len(guess)} does not match size {effective_size}"
             )
 
-        endpoint = endpoint_for_puzzle(
-            self._config.api_entrypoint,
-            self._config.api_base,
-            puzzle,
-        )
+        endpoint = endpoint_for_puzzle(self._config.api_base, puzzle)
         params: dict[str, object] = {"guess": guess, "size": effective_size}
         if puzzle == "random" and seed is not None:
             params["seed"] = seed

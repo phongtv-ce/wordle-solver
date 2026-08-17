@@ -25,7 +25,7 @@ def test_client_gets_guess_with_size_and_guess_query_params():
     query = parse_qs(parsed.query)
     assert parsed.scheme == "https"
     assert parsed.netloc == "api.example.test"
-    assert parsed.path == "/wordle"
+    assert parsed.path == "/daily"
     assert query["guess"] == ["guess"]
     assert query["size"] == ["5"]
     assert captured["headers"] == {"Accept": "application/json"}
@@ -40,7 +40,7 @@ def test_client_merges_query_params_with_existing_entrypoint_query():
         return b"[]"
 
     client = WordleClient(
-        make_config(api_entrypoint="https://api.example.test/wordle?foo=bar"),
+        make_config(api_base="https://api.example.test?foo=bar"),
         http_get=http_get,
     )
     client.guess("crane")
@@ -92,10 +92,7 @@ def test_client_random_uses_random_endpoint_and_seed():
         return json.dumps(GUESS_API_RAW).encode("utf-8")
 
     client = WordleClient(
-        make_config(
-            api_base="https://wordle.votee.dev:8000",
-            api_entrypoint="https://wordle.votee.dev:8000/daily",
-        ),
+        make_config(api_base="https://wordle.votee.dev:8000"),
         http_get=http_get,
     )
     client.guess("crane", size=5, puzzle="random", seed=42)
@@ -116,10 +113,7 @@ def test_client_random_omits_seed_when_not_set():
         return b"[]"
 
     client = WordleClient(
-        make_config(
-            api_base="https://wordle.votee.dev:8000",
-            api_entrypoint="https://wordle.votee.dev:8000/daily",
-        ),
+        make_config(api_base="https://wordle.votee.dev:8000"),
         http_get=http_get,
     )
     client.guess("crane", puzzle="random")

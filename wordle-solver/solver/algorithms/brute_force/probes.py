@@ -80,16 +80,23 @@ def next_fallback_guess(state: SolverState) -> str:
     if untried:
         return charset_probe(untried, state.word_length)
 
-    # Step 2: position-probe each discovered letter at most once.
-    unplaced = unplaced_present(
-        state.present_chars, state.correct_state, state.min_counts
-    )
-    for letter in unplaced:
-        if letter not in state.position_probed_chars:
-            return position_probe(letter, state.word_length, state.correct_state)
+    # Step 2: no greens yet — position-probe each unplaced present letter.
+    if not any(state.correct_state):
+        unplaced = unplaced_present(
+            state.present_chars, state.correct_state, state.min_counts
+        )
+        for letter in unplaced:
+            if letter not in state.position_probed_chars:
+                return position_probe(letter, state.word_length, state.correct_state)
 
+    # Step 3: keep greens; fill remaining slots with extra correct copies, then present.
     slots: list[str | None] = list(state.correct_state)
-    for letter in sorted(state.present_chars):
+    correct_letters = sorted({letter for letter in state.correct_state if letter is not None})
+    present_only = sorted(state.present_chars - frozenset(correct_letters))
+    for letter in (*correct_letters, *present_only):
+        placed = sum(1 for slot in slots if slot == letter)
+        if placed >= state.max_counts.get(letter, state.word_length):
+            continue
         for i in range(state.word_length):
             if slots[i] is None and can_place(letter, i, state.present_state):
                 slots[i] = letter

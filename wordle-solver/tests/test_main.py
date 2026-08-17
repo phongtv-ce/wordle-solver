@@ -243,7 +243,7 @@ def test_main_skips_size_then_solves_next(tmp_path):
     env_file.write_text(
         "\n".join(
             [
-                "WORDLE_API_ENTRYPOINT=https://api.example.test/daily",
+                "WORDLE_API_BASE=https://api.example.test",
                 "WORDLE_SIZE_BEGIN=4",
                 "WORDLE_SIZE_END=5",
             ]
@@ -268,7 +268,7 @@ def test_main_skips_size_then_solves_next(tmp_path):
 def test_main_returns_one_when_a_size_fails(tmp_path):
     env_file = tmp_path / ".env"
     env_file.write_text(
-        "WORDLE_API_ENTRYPOINT=https://api.example.test/daily\n",
+        "WORDLE_API_BASE=https://api.example.test\n",
         encoding="utf-8",
     )
 
@@ -286,7 +286,7 @@ def test_main_returns_one_when_a_size_fails(tmp_path):
 def test_main_rejects_seed_without_random_mode(tmp_path):
     env_file = tmp_path / ".env"
     env_file.write_text(
-        "WORDLE_API_ENTRYPOINT=https://api.example.test/daily\n",
+        "WORDLE_API_BASE=https://api.example.test\n",
         encoding="utf-8",
     )
 

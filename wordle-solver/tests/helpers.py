@@ -31,7 +31,6 @@ SOLVED_FEEDBACK = (
 def make_config(**overrides) -> AppConfig:
     values = {
         "api_base": "https://api.example.test",
-        "api_entrypoint": "https://api.example.test/wordle",
         "api_timeout_seconds": 5.0,
         "size_begin": 5,
         "size_end": 5,

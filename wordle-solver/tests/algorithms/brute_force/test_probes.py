@@ -112,19 +112,23 @@ def test_next_fallback_guess_repeats_next_unplaced_present_letter():
     assert next_fallback_guess(state) == "aaaaa"
 
 
-def test_next_fallback_guess_keeps_correct_when_position_probing():
-    # pleurisy: e already at slot 2, next unplaced letter is i → iieiiiii
+def test_next_fallback_guess_fills_holes_with_correct_then_present():
+    # Greens stay; holes get an extra copy of a correct letter, then present letters.
     state = make_state(
         word_length=8,
         candidates=(),
         present_chars=frozenset("eilprsuy"),
         min_counts={letter: 1 for letter in "eilprsuy"},
+        max_counts={"e": 2},
         correct_state=(None, None, "e", None, None, None, None, None),
         untried_external_chars=frozenset(),
         untried_dictionary_chars=frozenset(),
         position_probed_chars=frozenset({"e"}),
     )
-    assert next_fallback_guess(state) == "iieiiiii"
+    guess = next_fallback_guess(state)
+    assert guess[2] == "e"
+    assert guess != "iieiiiii"
+    assert "e" in guess[:2]
 
 
 def test_next_fallback_guess_skips_position_probe_after_letter_was_probed():
@@ -202,6 +206,25 @@ def test_next_fallback_guess_fills_remaining_holes_from_present_chars():
         position_probed_chars=frozenset({"a", "b"}),
     )
     assert next_fallback_guess(state) == "abb"
+
+
+def test_next_fallback_guess_does_not_flood_holes_with_one_present_letter():
+    from solver.algorithms.candidates.state import apply_feedback
+    from tests.helpers import wordle_feedback
+
+    target = "counterintuitive"
+    miss = "counterinvective"
+    state = make_state(
+        word_length=16,
+        candidates=(),
+        tried_chars=ALPHABET,
+        untried_dictionary_chars=frozenset(),
+        untried_external_chars=frozenset(),
+    )
+    state = apply_feedback(state, wordle_feedback(miss, target))
+    guess = next_fallback_guess(state)
+    assert guess[9:12] != "ccc"
+    assert guess != "counterinccctive"
 
 
 def test_brute_force_apply_feedback_marks_position_probe_letters():

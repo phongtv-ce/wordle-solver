@@ -305,7 +305,6 @@ def _resolve_puzzle_mode(
 def _replace_config(config: AppConfig, **changes) -> AppConfig:
     return AppConfig(
         api_base=config.api_base,
-        api_entrypoint=config.api_entrypoint,
         api_timeout_seconds=config.api_timeout_seconds,
         size_begin=changes.get("size_begin", config.size_begin),
         size_end=changes.get("size_end", config.size_end),

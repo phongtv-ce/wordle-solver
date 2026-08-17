@@ -279,9 +279,9 @@ Immutable game state. Fields documented in [ARCHITECTURE.md](ARCHITECTURE.md#sol
 - **Purpose:** Next guess when dictionary candidates are empty.
 - **Input:** `SolverState`
 - **Output:** `str` —
-  1. `position_probe` if unplaced present letters exist
-  2. else `charset_probe` if untried letters remain
-  3. else fill holes from `present_chars` that `can_place`
+  1. `charset_probe` if untried letters remain
+  2. else `position_probe` if no slots are correct yet and unplaced present letters exist
+  3. else fill remaining holes from correct letters (extra copies) then `present_chars` that `can_place`
 
 ---
 

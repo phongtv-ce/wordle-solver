@@ -29,3 +29,24 @@ def test_candidates_algorithm_solves_known_target():
         state = apply_feedback(state, feedback)
 
     raise AssertionError("candidates algorithm did not solve within 15 guesses")
+
+
+def test_fallback_fills_present_slots_with_correct_and_present_letters():
+    """Near-miss dictionary word: only test remaining holes, using extra greens."""
+    target = "counterintuitive"
+    dictionary = ("counterinvective",)
+    state = initial_state(16, dictionary)
+    seen: list[str] = []
+
+    for _ in range(40):
+        guess = next_guess(state)
+        assert guess not in seen, f"stuck repeating {guess!r} after {seen}"
+        seen.append(guess)
+        raw = wordle_feedback_raw(guess, target)
+        feedback = parse_feedback(raw)
+        if is_solved(feedback):
+            assert guess == target
+            return
+        state = apply_feedback(state, feedback)
+
+    raise AssertionError(f"did not solve; guesses={seen}")

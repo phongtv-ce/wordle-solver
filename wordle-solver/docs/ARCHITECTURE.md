@@ -130,7 +130,7 @@ Detailed design: [../../docs/algorithms/candidtes.md](../../docs/algorithms/cand
 `WORDLE_ALGORITHM=brute_force` ignores the dictionary for guessing:
 
 1. **Charset probe** — test `N` unused letters at once to discover which letters appear in the word.
-2. **Position probe** — fill unknown slots with one known letter, keeping already-correct slots (`iieiiiii` after `e` is locked, not `iiiiiiii`).
+2. **Position probe** — fill unknown slots with one known letter, keeping already-correct slots (`iieiiiii` after `e` is locked, not `iiiiiiii`). When some slots are already green, skip this and fill remaining holes with extra copies of correct letters, then other present letters.
 
 `apply_feedback` reuses the candidates pipeline so `present_chars`, `correct_state`, and untried sets stay consistent. `next_guess` always calls `next_fallback_guess`.
 

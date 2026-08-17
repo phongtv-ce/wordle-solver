@@ -32,7 +32,7 @@ GET https://wordle.votee.dev:8000/daily?guess=guess&size=5
 Accept: application/json
 ```
 
-Configured via `WORDLE_API_ENTRYPOINT` (typically ends with `/daily`).
+Configured via `WORDLE_API_BASE` with `/daily` appended when `WORDLE_MODE=daily`.
 
 ### Random
 
@@ -41,7 +41,7 @@ GET https://wordle.votee.dev:8000/random?guess=crane&size=5&seed=42
 Accept: application/json
 ```
 
-Built from `WORDLE_API_BASE` (derived from entrypoint or set explicitly). Enable with `wordle-solver --random`; pass `--seed 42` for a reproducible puzzle.
+Built from `WORDLE_API_BASE` with `/random` appended when `WORDLE_MODE=random`. Enable with `wordle-solver --random`; pass `--seed 42` for a reproducible puzzle.
 
 The client lowercases the guess before sending. If `len(guess) != size`, the client raises before calling the API.
 

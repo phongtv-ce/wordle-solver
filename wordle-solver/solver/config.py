@@ -16,7 +16,6 @@ PUZZLE_MODES = ("daily", "random")
 @dataclass(frozen=True)
 class AppConfig:
     api_base: str
-    api_entrypoint: str
     api_timeout_seconds: float
     size_begin: int
     size_end: int
@@ -41,10 +40,16 @@ def load_config(*, env_file: str | Path | None = None) -> AppConfig:
     if path.exists():
         load_dotenv(path, override=False)
 
-    from solver.api import derive_api_base
+    from solver.api import derive_api_base, normalize_api_base
 
-    entrypoint = _require("WORDLE_API_ENTRYPOINT").rstrip("/")
-    api_base = os.getenv("WORDLE_API_BASE", "").strip() or derive_api_base(entrypoint)
+    api_base_raw = os.getenv("WORDLE_API_BASE", "").strip()
+    entrypoint_raw = os.getenv("WORDLE_API_ENTRYPOINT", "").strip()
+    if api_base_raw:
+        api_base = normalize_api_base(api_base_raw.rstrip("/"))
+    elif entrypoint_raw:
+        api_base = derive_api_base(entrypoint_raw.rstrip("/"))
+    else:
+        raise ValueError("missing required env var WORDLE_API_BASE")
     algorithm = os.getenv("WORDLE_ALGORITHM", "candidates").strip().lower().replace("-", "_")
     if algorithm not in ALGORITHMS:
         raise ValueError(f"unknown WORDLE_ALGORITHM {algorithm!r}; choose from {ALGORITHMS}")
@@ -74,7 +79,6 @@ def load_config(*, env_file: str | Path | None = None) -> AppConfig:
 
     return AppConfig(
         api_base=api_base.rstrip("/"),
-        api_entrypoint=entrypoint,
         api_timeout_seconds=_float_env("WORDLE_API_TIMEOUT_SECONDS", 10.0),
         size_begin=size_begin,
         size_end=size_end,

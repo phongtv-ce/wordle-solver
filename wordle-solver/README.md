@@ -25,7 +25,7 @@ python -m venv .venv
 source .venv/bin/activate
 pip install -e ".[dev]"
 cp .env.example .env
-# Edit .env — set WORDLE_API_ENTRYPOINT at minimum
+# Edit .env — set WORDLE_API_BASE at minimum
 ```
 
 ## Configuration
@@ -34,8 +34,7 @@ Settings are read from `.env` (see `.env.example`):
 
 | Variable | Required | Default | Description |
 |----------|----------|---------|-------------|
-| `WORDLE_API_ENTRYPOINT` | yes | — | Daily puzzle URL (e.g. `https://wordle.votee.dev:8000/daily`) |
-| `WORDLE_API_BASE` | no | derived from entrypoint | API root for `/random` (e.g. `https://wordle.votee.dev:8000`) |
+| `WORDLE_API_BASE` | yes | — | API root (e.g. `http://localhost:8000`); `/daily` or `/random` is appended from mode |
 | `WORDLE_API_TIMEOUT_SECONDS` | no | `10` | HTTP timeout |
 | `WORDLE_MODE` | no | `daily` | Puzzle source: `daily` or `random` |
 | `WORDLE_SIZE_BEGIN` | no | `5` | First puzzle length to try (inclusive) |
@@ -74,7 +73,7 @@ On success the program prints each solved word. If `WORDLE_MAX_GUESSES` is reach
 Daily (default):
 
 ```http
-GET {WORDLE_API_ENTRYPOINT}?guess=guess&size=5
+GET {WORDLE_API_BASE}/daily?guess=guess&size=5
 Accept: application/json
 ```
 
